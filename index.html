@@ -1,0 +1,453 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>언제 나가야 해?</title>
+
+  <!-- 귀엽고 읽기 쉬운 한글 폰트 -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Jua&family=Noto+Sans+KR:wght@400;500;700&display=swap" rel="stylesheet">
+
+  <style>
+    :root {
+      --bg: #fff7fb;
+      --card: #ffffff;
+      --main: #ff8fc7;
+      --main-dark: #f061a8;
+      --sub: #ffe4f1;
+      --text: #3d3142;
+      --muted: #897987;
+      --mint: #d8fff1;
+      --yellow: #fff2b8;
+      --shadow: 0 18px 45px rgba(240, 97, 168, 0.18);
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      font-family: "Noto Sans KR", system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+      color: var(--text);
+      background:
+        radial-gradient(circle at 15% 10%, #ffe0ef 0 18%, transparent 19%),
+        radial-gradient(circle at 85% 20%, #dffcf3 0 15%, transparent 16%),
+        radial-gradient(circle at 70% 88%, #fff0b8 0 18%, transparent 19%),
+        var(--bg);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+    }
+
+    .app {
+      width: min(100%, 480px);
+      background: rgba(255, 255, 255, 0.86);
+      backdrop-filter: blur(12px);
+      border: 2px solid rgba(255, 255, 255, 0.9);
+      border-radius: 32px;
+      box-shadow: var(--shadow);
+      padding: 26px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .app::before {
+      content: "";
+      position: absolute;
+      width: 120px;
+      height: 120px;
+      border-radius: 50%;
+      right: -35px;
+      top: -35px;
+      background: var(--sub);
+      z-index: 0;
+    }
+
+    .content {
+      position: relative;
+      z-index: 1;
+    }
+
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: var(--mint);
+      color: #31725f;
+      border-radius: 999px;
+      padding: 8px 13px;
+      font-size: 13px;
+      font-weight: 700;
+      margin-bottom: 12px;
+    }
+
+    h1 {
+      margin: 0;
+      font-family: "Jua", "Noto Sans KR", sans-serif;
+      font-size: clamp(34px, 9vw, 48px);
+      line-height: 1.05;
+      letter-spacing: -0.02em;
+    }
+
+    .subtitle {
+      margin: 12px 0 24px;
+      color: var(--muted);
+      font-size: 15px;
+      line-height: 1.6;
+    }
+
+    .field {
+      margin-bottom: 18px;
+    }
+
+    label {
+      display: block;
+      margin-bottom: 8px;
+      font-weight: 700;
+      font-size: 14px;
+    }
+
+    select,
+    input {
+      width: 100%;
+      border: 2px solid #f3d9e8;
+      background: #fff;
+      border-radius: 18px;
+      padding: 15px 16px;
+      font-size: 17px;
+      color: var(--text);
+      outline: none;
+      transition: 0.2s ease;
+    }
+
+    select:focus,
+    input:focus {
+      border-color: var(--main);
+      box-shadow: 0 0 0 5px rgba(255, 143, 199, 0.18);
+    }
+
+    .chips {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-top: 9px;
+    }
+
+    .chip {
+      border: 0;
+      border-radius: 999px;
+      padding: 8px 11px;
+      background: var(--sub);
+      color: var(--main-dark);
+      font-weight: 700;
+      cursor: pointer;
+      transition: 0.15s ease;
+    }
+
+    .chip:hover {
+      transform: translateY(-1px);
+      background: #ffd4e9;
+    }
+
+    .button {
+      width: 100%;
+      border: 0;
+      border-radius: 20px;
+      background: linear-gradient(135deg, var(--main), #ffb4d8);
+      color: white;
+      padding: 16px 18px;
+      font-size: 18px;
+      font-weight: 800;
+      cursor: pointer;
+      box-shadow: 0 12px 24px rgba(240, 97, 168, 0.28);
+      transition: 0.2s ease;
+    }
+
+    .button:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 16px 28px rgba(240, 97, 168, 0.34);
+    }
+
+    .result {
+      margin-top: 22px;
+      border-radius: 26px;
+      padding: 20px;
+      background: linear-gradient(135deg, #fff, #fff6fb);
+      border: 2px dashed #ffc2df;
+      display: none;
+    }
+
+    .result.show {
+      display: block;
+      animation: pop 0.24s ease-out;
+    }
+
+    @keyframes pop {
+      from {
+        opacity: 0;
+        transform: scale(0.97) translateY(6px);
+      }
+      to {
+        opacity: 1;
+        transform: scale(1) translateY(0);
+      }
+    }
+
+    .result-title {
+      font-size: 14px;
+      color: var(--muted);
+      margin-bottom: 6px;
+    }
+
+    .leave-time {
+      font-family: "Jua", "Noto Sans KR", sans-serif;
+      font-size: 46px;
+      color: var(--main-dark);
+      line-height: 1;
+      margin: 4px 0 14px;
+    }
+
+    .details {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 8px;
+      font-size: 14px;
+      color: #645666;
+    }
+
+    .detail-row {
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+      background: #fff;
+      border-radius: 14px;
+      padding: 10px 12px;
+    }
+
+    .error {
+      margin-top: 14px;
+      color: #d63d75;
+      background: #fff0f6;
+      border-radius: 16px;
+      padding: 12px 14px;
+      font-size: 14px;
+      line-height: 1.5;
+      display: none;
+    }
+
+    .error.show {
+      display: block;
+    }
+
+    .footer-note {
+      margin-top: 18px;
+      text-align: center;
+      color: var(--muted);
+      font-size: 12px;
+    }
+  </style>
+</head>
+<body>
+  <main class="app">
+    <div class="content">
+      <div class="badge">🚇 출근 요정 도우미</div>
+      <h1>언제 집에서<br />나가야 해?</h1>
+      <p class="subtitle">
+        평일, 주말, 공휴일을 고르고 출근시간을 입력하면<br />집에서 출발해야 하는 시간을 알려줄게요.
+      </p>
+
+      <section class="field">
+        <label for="dayType">오늘은?</label>
+        <select id="dayType">
+          <option value="weekday">평일</option>
+          <option value="weekend">주말</option>
+          <option value="holiday">공휴일</option>
+        </select>
+      </section>
+
+      <section class="field">
+        <label for="workTime">출근시간</label>
+        <input
+          id="workTime"
+          type="text"
+          inputmode="numeric"
+          placeholder="예: 8:30"
+          autocomplete="off"
+        />
+        <div class="chips" id="timeChips"></div>
+      </section>
+
+      <button class="button" id="findButton">출발 시간 보기</button>
+
+      <div class="error" id="errorBox"></div>
+
+      <section class="result" id="resultBox" aria-live="polite">
+        <div class="result-title">집에서 출발하면 좋은 시간</div>
+        <div class="leave-time" id="leaveTime">--:--</div>
+        <div class="details">
+          <div class="detail-row">
+            <span>출근시간</span>
+            <strong id="detailWork">--:--</strong>
+          </div>
+          <div class="detail-row">
+            <span>락커 도착</span>
+            <strong id="detailLocker">--:--</strong>
+          </div>
+          <div class="detail-row">
+            <span>지하철 출발</span>
+            <strong id="detailSubway">--:--</strong>
+          </div>
+        </div>
+      </section>
+
+      <p class="footer-note">오늘도 늦지 말고 사뿐히 출발하기 💗</p>
+    </div>
+  </main>
+
+  <script>
+    const schedule = {
+      weekday: {
+        label: "평일",
+        times: {
+          "6:30": { locker: "6:13", subway: "5:46", home: "5:36" },
+          "7:00": { locker: "6:39", subway: "6:09", home: "5:59" },
+          "7:30": { locker: "7:18", subway: "6:50", home: "6:40" },
+          "8:00": { locker: "7:45", subway: "7:16", home: "6:58" },
+          "8:30": { locker: "8:15", subway: "7:45", home: "7:35" },
+          "9:00": { locker: "8:44", subway: "8:17", home: "8:07" },
+          "9:30": { locker: "9:12", subway: "8:39", home: "8:29" },
+          "11:00": { locker: "10:41", subway: "10:14", home: "10:04" },
+          "11:30": { locker: "11:15", subway: "10:40", home: "10:30" }
+        }
+      },
+      weekend: {
+        label: "주말",
+        times: {
+          "6:30": { locker: "6:19", subway: "5:50", home: "5:40" },
+          "7:00": { locker: "6:31", subway: "6:04", home: "5:54" },
+          "7:30": { locker: "7:19", subway: "6:46", home: "6:36" },
+          "8:00": { locker: "7:45", subway: "7:13", home: "7:03" },
+          "8:30": { locker: "8:07", subway: "7:39", home: "7:29" },
+          "10:00": { locker: "9:43", subway: "9:10", home: "9:00" },
+          "10:30": { locker: "10:16", subway: "9:49", home: "9:39" },
+          "11:00": { locker: "10:38", subway: "10:02", home: "9:52" },
+          "11:30": { locker: "11:15", subway: "10:41", home: "10:31" }
+        }
+      },
+      holiday: {
+        label: "공휴일",
+        times: {
+          "6:30": { locker: "6:19", subway: "5:50", home: "5:40" },
+          "7:00": { locker: "6:31", subway: "6:04", home: "5:54" },
+          "7:30": { locker: "7:19", subway: "6:46", home: "6:36" }
+        }
+      }
+    };
+
+    const dayType = document.getElementById("dayType");
+    const workTime = document.getElementById("workTime");
+    const timeChips = document.getElementById("timeChips");
+    const findButton = document.getElementById("findButton");
+    const resultBox = document.getElementById("resultBox");
+    const errorBox = document.getElementById("errorBox");
+
+    const leaveTime = document.getElementById("leaveTime");
+    const detailWork = document.getElementById("detailWork");
+    const detailLocker = document.getElementById("detailLocker");
+    const detailSubway = document.getElementById("detailSubway");
+
+    function normalizeTime(value) {
+      const trimmed = value.trim().replace("시", ":").replace("분", "");
+
+      // 830 -> 8:30, 0630 -> 6:30 형태 지원
+      if (/^\d{3,4}$/.test(trimmed)) {
+        const minute = trimmed.slice(-2);
+        const hour = trimmed.slice(0, -2).replace(/^0/, "");
+        return `${hour}:${minute}`;
+      }
+
+      const match = trimmed.match(/^(\d{1,2})\s*:?\s*(\d{2})$/);
+      if (!match) return trimmed;
+
+      const hour = String(Number(match[1]));
+      const minute = match[2].padStart(2, "0");
+      return `${hour}:${minute}`;
+    }
+
+    function renderChips() {
+      const selected = dayType.value;
+      const times = Object.keys(schedule[selected].times);
+      timeChips.innerHTML = "";
+
+      times.forEach((time) => {
+        const chip = document.createElement("button");
+        chip.type = "button";
+        chip.className = "chip";
+        chip.textContent = time;
+        chip.addEventListener("click", () => {
+          workTime.value = time;
+          showResult();
+        });
+        timeChips.appendChild(chip);
+      });
+    }
+
+    function showError(message) {
+      errorBox.textContent = message;
+      errorBox.classList.add("show");
+      resultBox.classList.remove("show");
+    }
+
+    function clearError() {
+      errorBox.textContent = "";
+      errorBox.classList.remove("show");
+    }
+
+    function showResult() {
+      const selected = dayType.value;
+      const normalized = normalizeTime(workTime.value);
+      const data = schedule[selected].times[normalized];
+      const availableTimes = Object.keys(schedule[selected].times).join(", ");
+
+      if (!normalized) {
+        showError("출근시간을 입력해 주세요. 예: 8:30");
+        return;
+      }
+
+      if (!data) {
+        showError(`${schedule[selected].label}에는 ${normalized} 출근시간이 아직 없어요. 가능한 시간: ${availableTimes}`);
+        return;
+      }
+
+      clearError();
+      leaveTime.textContent = data.home;
+      detailWork.textContent = normalized;
+      detailLocker.textContent = data.locker;
+      detailSubway.textContent = data.subway;
+      resultBox.classList.add("show");
+    }
+
+    dayType.addEventListener("change", () => {
+      renderChips();
+      clearError();
+      resultBox.classList.remove("show");
+      workTime.value = "";
+    });
+
+    findButton.addEventListener("click", showResult);
+
+    workTime.addEventListener("keydown", (event) => {
+      if (event.key === "Enter") {
+        showResult();
+      }
+    });
+
+    renderChips();
+  </script>
+</body>
+</html>
